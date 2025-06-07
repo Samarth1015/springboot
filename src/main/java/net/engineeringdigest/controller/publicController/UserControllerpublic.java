@@ -1,10 +1,16 @@
 package net.engineeringdigest.controller.publicController;
 
+import net.bytebuddy.implementation.bytecode.Throw;
 import net.engineeringdigest.model.User;
+import net.engineeringdigest.service.JwtService;
 import net.engineeringdigest.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,6 +18,10 @@ import org.springframework.web.bind.annotation.*;
 public class UserControllerpublic {
     @Autowired
     private UserService us;
+    @Autowired
+    AuthenticationManager authenticationManagerBean ;
+    @Autowired
+    JwtService jwts;
 
 //    // Get the data of all user
 //    @GetMapping
@@ -34,6 +44,28 @@ public class UserControllerpublic {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody User user){
+        System.out.println("hitting");
+        try{
+        Authentication auth= authenticationManagerBean.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(),user.getPassword()));
+        if(auth.isAuthenticated()){
+          return ResponseEntity.ok(jwts.generateToken(user.getUsername()));
+
+        }
+        else {
+
+            return  new ResponseEntity<>("samarth", HttpStatus.OK);
+
+
+
+        }}
+        catch (Exception err){
+            System.out.println(err);
+        }
+        return  new ResponseEntity<>("samarth", HttpStatus.OK);
     }
 
 //    //Get the data of the user
